@@ -81,7 +81,6 @@ New tables/seeds go in a numbered file in `db/init/` (e.g. `04-myapp.sql`).
 ## Deliberately not built
 
 - Real SSO or password auth (the seeded-user picker stands in)
-- Hosting, CI, deployment
 - Detail views (table rows only)
 - Search or filtering
 - Multi-step approval flows
