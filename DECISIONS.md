@@ -43,7 +43,9 @@ were picked by me and can be revisited.
     visit asks you to pick, so the permission model is visible from the
     start. No passwords per spec.
 12. **Seeded emails use `@example.com`** (RFC-reserved domain).
-13. **Ports: app on 3000, Postgres on 5432.**
+13. **Ports: app on 3000; Postgres stays on the internal compose network**
+    (no host port published — avoids colliding with a local Postgres on
+    5432).
 14. **Postgres 17-alpine in compose; app Dockerfile on node:24-alpine**
     with `output: "standalone"` for a minimal runner image.
 15. **`core.v_audit_log` view** joins users and extracts `allowed` from
