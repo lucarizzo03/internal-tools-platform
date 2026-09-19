@@ -8,7 +8,7 @@ registerApp({
   source: "flags.feature_flags",
   orderBy: { key: "id" },
   columns: [
-    { key: "name", label: "Name" },
+    { key: "name", label: "Name", deemphasizeRepeats: true },
     { key: "environment", label: "Environment" },
     {
       key: "rollout_percent",
@@ -25,6 +25,7 @@ registerApp({
     {
       label: "Enable",
       permission: "flags.write",
+      when: (row) => row.enabled === false,
       handler: async (row: Row) => {
         await query(
           `UPDATE flags.feature_flags
@@ -37,6 +38,7 @@ registerApp({
     {
       label: "Disable",
       permission: "flags.write",
+      when: (row) => row.enabled === true,
       handler: async (row: Row) => {
         await query(
           `UPDATE flags.feature_flags

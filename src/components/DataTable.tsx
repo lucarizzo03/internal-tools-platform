@@ -18,7 +18,9 @@ function defaultRender(value: unknown): ReactNode {
 
 async function loadRows(config: AppConfig): Promise<Row[]> {
   if (!SOURCE.test(config.source)) {
-    throw new Error(`Invalid source "${config.source}" (expected schema.table)`);
+    throw new Error(
+      `Invalid source "${config.source}" (expected schema.table)`,
+    );
   }
   let sql = `SELECT * FROM ${config.source}`;
   if (config.orderBy) {
@@ -60,43 +62,63 @@ export async function DataTable({ app }: { app: string }) {
       <tbody>
         {rows.map((row, i) => (
           <tr key={String(row.id ?? i)} className="border-b border-slate-100">
-            {config.columns.map((c) => (
-              <td key={c.key} className="px-4 py-2 text-slate-800">
-                {c.render ? c.render(row[c.key], row) : defaultRender(row[c.key])}
-              </td>
-            ))}
+            {config.columns.map((c) => {
+              const repeat =
+                c.deemphasizeRepeats &&
+                i > 0 &&
+                rows[i - 1][c.key] === row[c.key];
+              return (
+                <td
+                  key={c.key}
+                  className={`px-4 py-2 ${repeat ? "text-slate-300" : "text-slate-800"}`}
+                >
+                  {c.render
+                    ? c.render(row[c.key], row)
+                    : defaultRender(row[c.key])}
+                </td>
+              );
+            })}
             {showActions && (
               <td className="px-4 py-2">
                 <div className="flex items-center gap-2">
-                  {actions.map((a) => {
-                    const allowed = perms.has(a.permission);
-                    return (
-                      <form
-                        key={a.label}
-                        action={executeRowAction.bind(null, app, a.label, row)}
-                        className="flex items-center gap-1"
-                      >
-                        {a.input && (
-                          <input
-                            name={a.input.name}
-                            type={a.input.type}
-                            placeholder={a.input.placeholder}
-                            required
-                            disabled={!allowed}
-                            className="w-20 rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100"
-                          />
-                        )}
-                        <button
-                          type="submit"
-                          disabled={!allowed}
-                          title={allowed ? undefined : `Requires ${a.permission}`}
-                          className="rounded bg-slate-800 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  {actions
+                    .filter((a) => !a.when || a.when(row))
+                    .map((a) => {
+                      const allowed = perms.has(a.permission);
+                      return (
+                        <form
+                          key={a.label}
+                          action={executeRowAction.bind(
+                            null,
+                            app,
+                            a.label,
+                            row,
+                          )}
+                          className="flex items-center gap-1"
                         >
-                          {a.label}
-                        </button>
-                      </form>
-                    );
-                  })}
+                          {a.input && (
+                            <input
+                              name={a.input.name}
+                              type={a.input.type}
+                              placeholder={a.input.placeholder}
+                              required
+                              disabled={!allowed}
+                              className="w-20 rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100"
+                            />
+                          )}
+                          <button
+                            type="submit"
+                            disabled={!allowed}
+                            title={
+                              allowed ? undefined : `Requires ${a.permission}`
+                            }
+                            className="rounded bg-slate-800 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                          >
+                            {a.label}
+                          </button>
+                        </form>
+                      );
+                    })}
                 </div>
               </td>
             )}

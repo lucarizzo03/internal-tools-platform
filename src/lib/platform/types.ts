@@ -9,6 +9,8 @@ export interface Column {
   label: string;
   /** Optional formatter; defaults to a sane stringification. */
   render?: (value: unknown, row: Row) => React.ReactNode;
+  /** Dim the cell when its value repeats the row directly above. */
+  deemphasizeRepeats?: boolean;
 }
 
 export interface ActionInput {
@@ -22,6 +24,8 @@ export interface RowAction {
   label: string;
   /** Permission key required to run this action, e.g. "flags.write". */
   permission: string;
+  /** Optional predicate: the button renders only for rows it accepts. */
+  when?: (row: Row) => boolean;
   /** Optional inline input rendered next to the button (e.g. rollout %). */
   input?: ActionInput;
   /**
